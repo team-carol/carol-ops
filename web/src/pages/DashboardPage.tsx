@@ -76,6 +76,7 @@ function StatusPanel() {
     <>
       <div className="card">
         <div className="stat-grid">
+          <Stat label="carol-bot 버전" value={status.version || "—"} />
           <Stat label="길드 수" value={String(status.guildCount)} />
           <Stat label="등록 유저 수" value={String(status.userCount)} />
           <Stat label="게이트웨이 핑" value={`${status.gatewayPingMs}ms`} />
@@ -132,13 +133,25 @@ function ContainersPanel() {
               <strong>{name}</strong> <span className={`tag ${c.State === "running" ? "tag-green" : "tag-gray"}`}>{c.State}</span>
             </p>
             <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem", flexWrap: "wrap" }}>
-              <button className="btn btn-ghost btn-sm" disabled={busyId === c.Id} onClick={() => act(c.Id, "restart")}>
+              <button
+                className="btn btn-ghost btn-sm"
+                disabled={busyId === c.Id || c.State !== "running"}
+                onClick={() => act(c.Id, "restart")}
+              >
                 재시작
               </button>
-              <button className="btn btn-danger btn-sm" disabled={busyId === c.Id} onClick={() => setConfirmTarget(c)}>
+              <button
+                className="btn btn-danger btn-sm"
+                disabled={busyId === c.Id || c.State !== "running"}
+                onClick={() => setConfirmTarget(c)}
+              >
                 정지
               </button>
-              <button className="btn btn-ghost btn-sm" disabled={busyId === c.Id} onClick={() => act(c.Id, "start")}>
+              <button
+                className="btn btn-ghost btn-sm"
+                disabled={busyId === c.Id || c.State === "running"}
+                onClick={() => act(c.Id, "start")}
+              >
                 시작
               </button>
               <button className="btn btn-ghost btn-sm" onClick={() => setDetailTarget(c)}>

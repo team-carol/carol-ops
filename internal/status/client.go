@@ -36,6 +36,7 @@ type BotStatus struct {
 	LastSyncAt    string `json:"lastSyncAt"`
 	UptimeSeconds int    `json:"uptimeSeconds"`
 	UserCount     int    `json:"userCount"`
+	Version       string `json:"version"`
 }
 
 func (c *Client) Fetch(ctx context.Context) (*BotStatus, error) {

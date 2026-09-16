@@ -29,6 +29,7 @@ export interface BotStatus {
   lastSyncAt: string;
   uptimeSeconds: number;
   userCount: number;
+  version: string;
 }
 
 export interface HostInfo {
