@@ -8,7 +8,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 )
+
+// requestTimeout bounds calls to carol-bot so a network hiccup (wrong
+// docker network, DNS not resolving carol-bot) surfaces as a fast error
+// instead of hanging until Cloudflare's own tunnel timeout returns an
+// opaque 502 to the browser.
+const requestTimeout = 5 * time.Second
 
 type Client struct {
 	baseURL string
@@ -17,7 +24,7 @@ type Client struct {
 }
 
 func New(baseURL, secret string) *Client {
-	return &Client{baseURL: baseURL, secret: secret, http: &http.Client{}}
+	return &Client{baseURL: baseURL, secret: secret, http: &http.Client{Timeout: requestTimeout}}
 }
 
 // BotStatus mirrors the JSON shape carol-bot's GET /admin/status returns.

@@ -1,12 +1,9 @@
 {
   "listenAddr": ":8090",
-  "dockerProxyUrl": "http://docker-socket-proxy:2375",
+  "dockerProxyUrl": "http://docker-proxy:2375",
   "composeProject": "carol",
   "carolConfigPath": "/carol/config.json",
   "carolEnvPath": "/carol/.env",
   "carolStatusUrl": "http://carol-bot:3456",
-  "carolStatusSecret": "carol-bot config.json의 opsSharedSecret과 동일한 값",
-  "adminUsername": "",
-  "adminPassword": "",
-  "sessionSecret": ""
+  "carolStatusSecret": "carol-bot config.json의 opsSharedSecret과 동일한 값"
 }

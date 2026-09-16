@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"carol-ops/internal/api"
-	"carol-ops/internal/auth"
 	"carol-ops/internal/config"
 	"carol-ops/internal/dockerctl"
 	"carol-ops/internal/status"
@@ -23,14 +22,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("load config: %v", err)
 	}
-	if cfg.GeneratedCredentials {
-		log.Printf("==============================================================")
-		log.Printf(" generated initial admin login (saved to %s):", configPath)
-		log.Printf("   username: %s", cfg.AdminUsername)
-		log.Printf("   password: %s", cfg.AdminPassword)
-		log.Printf(" change adminPassword in config.json once you've logged in.")
-		log.Printf("==============================================================")
-	}
 
 	staticFS, err := fs.Sub(web.Dist, "dist")
 	if err != nil {
@@ -40,7 +31,6 @@ func main() {
 	router := api.NewRouter(api.Deps{
 		Docker:         dockerctl.New(cfg.DockerProxyURL, cfg.ComposeProject),
 		Status:         status.New(cfg.CarolStatusURL, cfg.CarolStatusSecret),
-		Auth:           auth.New(cfg.AdminUsername, cfg.AdminPassword, cfg.SessionSecret),
 		StaticFS:       http.FS(staticFS),
 		ConfigJSONPath: cfg.CarolConfigPath,
 		EnvPath:        cfg.CarolEnvPath,

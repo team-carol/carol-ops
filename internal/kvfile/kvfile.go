@@ -47,27 +47,32 @@ func ReadJSON(path string) ([]Entry, error) {
 	return entries, nil
 }
 
-// WriteJSON merges entries into the existing JSON object at path, preserving
-// unrelated keys and each value's original JSON type (string vs number vs
-// bool) rather than overwriting everything as strings.
+// WriteJSON replaces the JSON object at path with exactly the given entries
+// — a key present in the file but absent from entries is deleted. The web
+// editor always PUTs its full draft (see KeyValueEditor.tsx), so this is how
+// removing a row actually removes the key rather than merely not updating
+// it. Each kept key's original JSON type (string vs number vs bool) is
+// preserved rather than overwriting everything as strings; new keys are
+// written as JSON strings.
 func WriteJSON(path string, entries []Entry) error {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return fmt.Errorf("read %s: %w", path, err)
 	}
-	var raw map[string]json.RawMessage
-	if err := json.Unmarshal(data, &raw); err != nil {
+	var existing map[string]json.RawMessage
+	if err := json.Unmarshal(data, &existing); err != nil {
 		return fmt.Errorf("parse %s: %w", path, err)
 	}
+	next := make(map[string]json.RawMessage, len(entries))
 	for _, e := range entries {
-		existing, ok := raw[e.Key]
-		encoded, err := encodeLike(existing, ok, e.Value)
+		old, ok := existing[e.Key]
+		encoded, err := encodeLike(old, ok, e.Value)
 		if err != nil {
 			return fmt.Errorf("%s: encode %q: %w", path, e.Key, err)
 		}
-		raw[e.Key] = encoded
+		next[e.Key] = encoded
 	}
-	out, err := json.MarshalIndent(raw, "", "  ")
+	out, err := json.MarshalIndent(next, "", "  ")
 	if err != nil {
 		return err
 	}
@@ -129,28 +134,13 @@ func ReadEnv(path string) ([]Entry, error) {
 	return entries, nil
 }
 
-// WriteEnv merges entries into the .env file at path, preserving line order
-// for existing keys and appending new ones.
+// WriteEnv replaces the .env file at path with exactly the given entries, in
+// the given order — same full-replace contract as WriteJSON, so omitting a
+// row's key from the PUT is how the editor deletes it.
 func WriteEnv(path string, entries []Entry) error {
-	existing, err := ReadEnv(path)
-	if err != nil {
-		return err
-	}
-	merged := map[string]string{}
-	var order []string
-	for _, e := range existing {
-		merged[e.Key] = e.Value
-		order = append(order, e.Key)
-	}
-	for _, e := range entries {
-		if _, ok := merged[e.Key]; !ok {
-			order = append(order, e.Key)
-		}
-		merged[e.Key] = e.Value
-	}
 	var b strings.Builder
-	for _, k := range order {
-		fmt.Fprintf(&b, "%s=%s\n", k, merged[k])
+	for _, e := range entries {
+		fmt.Fprintf(&b, "%s=%s\n", e.Key, e.Value)
 	}
 	return os.WriteFile(path, []byte(b.String()), 0o644)
 }

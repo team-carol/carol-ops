@@ -1,15 +1,11 @@
-// Thin fetch wrapper for the Go backend (internal/api/router.go). Auth is a
-// cookie (see internal/auth/session.go), so every call sends credentials and
-// a 401 means "not logged in" rather than a request-level failure.
-export class UnauthorizedError extends Error {}
-
+// Thin fetch wrapper for the Go backend (internal/api/router.go). No login
+// here — Cloudflare Access in front of the tunnel is the only auth boundary.
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, {
     credentials: "include",
     headers: { "Content-Type": "application/json" },
     ...init,
   });
-  if (res.status === 401) throw new UnauthorizedError();
   if (!res.ok) throw new Error(`${init?.method ?? "GET"} ${path}: ${res.status} ${await res.text()}`);
   if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;
@@ -35,10 +31,6 @@ export interface BotStatus {
 }
 
 export const api = {
-  login: (username: string, password: string) =>
-    request<void>("/api/login", { method: "POST", body: JSON.stringify({ Username: username, Password: password }) }),
-  logout: () => request<void>("/api/logout", { method: "POST" }),
-
   getConfig: () => request<Entry[]>("/api/config"),
   putConfig: (entries: Entry[]) => request<void>("/api/config", { method: "PUT", body: JSON.stringify(entries) }),
 

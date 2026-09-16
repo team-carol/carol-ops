@@ -13,9 +13,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 )
 
 const projectLabel = "com.docker.compose.project"
+
+// requestTimeout bounds calls to the docker-socket-proxy sidecar so a
+// network problem surfaces as a fast error instead of hanging until
+// Cloudflare's own tunnel timeout returns an opaque 502 to the browser.
+const requestTimeout = 5 * time.Second
 
 type Client struct {
 	baseURL string
@@ -24,7 +30,7 @@ type Client struct {
 }
 
 func New(baseURL, composeProject string) *Client {
-	return &Client{baseURL: baseURL, project: composeProject, http: &http.Client{}}
+	return &Client{baseURL: baseURL, project: composeProject, http: &http.Client{Timeout: requestTimeout}}
 }
 
 type Container struct {
