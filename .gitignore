@@ -2,5 +2,6 @@
 *.exe
 config.json
 config.local.json
+.env
 web/dist/
 web/node_modules/

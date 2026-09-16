@@ -44,13 +44,29 @@ services:
       # GET /admin/status (external network, joined by both compose
       # projects — see carol's docker-compose.yml `bot.networks`). Create it
       # once on the host: `docker network create carol-shared`.
+      # default: reachable by the cloudflared service below.
       - internal
       - carol-shared
-    ports:
-      # Admin UI. Do not expose this publicly — put it behind an SSH tunnel,
-      # a Cloudflare Access-protected hostname, or a VPN. It's a single
-      # shared-credential login, not meant to be internet-facing.
-      - "127.0.0.1:8090:8090"
+      - default
+    # No host port published — the only path in is the cloudflared tunnel
+    # below, and Cloudflare Access gates the hostname before any request
+    # reaches this container. Set that policy up in the Cloudflare Zero
+    # Trust dashboard for the hostname this tunnel points at.
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: carol-ops-tunnel
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${CF_TUNNEL_TOKEN:?set CF_TUNNEL_TOKEN in .env}
+    depends_on:
+      - carol-ops
+    networks:
+      # Deliberately NOT on `internal` (that network blocks outbound
+      # internet, which cloudflared needs to reach Cloudflare's edge) or
+      # `carol-shared` (no reason for the tunnel to see carol-bot).
+      - default
 
 networks:
   internal:
