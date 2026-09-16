@@ -25,7 +25,9 @@ services:
 
   carol-ops:
     build: .
-    image: ghcr.io/bitbyte08/carol-ops:latest
+    # Must match deploy.yml's IMAGE_REPO (ghcr.io/<repo owner, lowercased>/carol-ops) —
+    # the repo lives under the team-carol org, not the bitbyte08 user.
+    image: ghcr.io/team-carol/carol-ops:latest
     container_name: carol-ops
     restart: unless-stopped
     depends_on:
