@@ -12,8 +12,10 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
 
 	"carol-ops/internal/dockerctl"
+	"carol-ops/internal/hostinfo"
 	"carol-ops/internal/kvfile"
 	"carol-ops/internal/status"
 )
@@ -44,6 +46,8 @@ func NewRouter(deps Deps) http.Handler {
 	})
 
 	mux.HandleFunc("POST /api/containers/{id}/{action}", handleContainerAction(deps.Docker))
+	mux.HandleFunc("GET /api/containers/{id}", handleContainerInspect(deps.Docker))
+	mux.HandleFunc("GET /api/containers/{id}/logs", handleContainerLogs(deps.Docker))
 
 	mux.HandleFunc("GET /api/status", func(w http.ResponseWriter, r *http.Request) {
 		botStatus, err := deps.Status.Fetch(r.Context())
@@ -53,6 +57,16 @@ func NewRouter(deps Deps) http.Handler {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(botStatus)
+	})
+
+	mux.HandleFunc("GET /api/host", func(w http.ResponseWriter, r *http.Request) {
+		info, err := hostinfo.Collect()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(info)
 	})
 
 	mux.HandleFunc("GET /api/config", handleReadKV(deps.ConfigJSONPath, kvfile.ReadJSON))
@@ -88,6 +102,44 @@ func handleContainerAction(docker *dockerctl.Client) http.HandlerFunc {
 			return
 		}
 		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
+func handleContainerInspect(docker *dockerctl.Client) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		detail, err := docker.Inspect(r.Context(), r.PathValue("id"))
+		if errors.Is(err, dockerctl.ErrNotOwned) {
+			http.Error(w, "container is not managed by this carol-ops instance", http.StatusForbidden)
+			return
+		}
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadGateway)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(detail)
+	}
+}
+
+func handleContainerLogs(docker *dockerctl.Client) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		tail := 200
+		if raw := r.URL.Query().Get("tail"); raw != "" {
+			if n, err := strconv.Atoi(raw); err == nil && n > 0 {
+				tail = n
+			}
+		}
+		logs, err := docker.Logs(r.Context(), r.PathValue("id"), tail)
+		if errors.Is(err, dockerctl.ErrNotOwned) {
+			http.Error(w, "container is not managed by this carol-ops instance", http.StatusForbidden)
+			return
+		}
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadGateway)
+			return
+		}
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.Write([]byte(logs))
 	}
 }
 

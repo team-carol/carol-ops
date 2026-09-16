@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-import { Button, IconButton, InlineNotification, TextInput, Stack } from "@carbon/react";
-import { Add, TrashCan } from "@carbon/icons-react";
 import type { Entry } from "../api/client";
 
 const SECRET_KEY_PATTERN = /secret|token|password|key/i;
@@ -63,41 +61,37 @@ export default function KeyValueEditor({ entries, onSave }: Props) {
   };
 
   return (
-    <Stack gap={5}>
-      {error && <InlineNotification kind="error" title="저장 실패" subtitle={error} onCloseButtonClick={() => setError(null)} />}
-      {saved && <InlineNotification kind="success" title="저장됨" onCloseButtonClick={() => setSaved(false)} />}
-      <Stack gap={4}>
-        {draft.map((row) => (
-          <div key={row.id} style={{ display: "flex", gap: "0.5rem", alignItems: "flex-end" }}>
-            <TextInput
-              id={`kv-key-${row.id}`}
-              labelText="키"
-              value={row.key}
-              onChange={(e) => updateKey(row.id, e.target.value)}
-              style={{ flex: 1 }}
-            />
-            <TextInput
+    <div>
+      {error && <div className="notification notification-error">저장 실패: {error}</div>}
+      {saved && <div className="notification notification-success">저장됨</div>}
+      {draft.map((row) => (
+        <div className="row" key={row.id}>
+          <div className="field">
+            <label htmlFor={`kv-key-${row.id}`}>키</label>
+            <input id={`kv-key-${row.id}`} value={row.key} onChange={(e) => updateKey(row.id, e.target.value)} />
+          </div>
+          <div className="field">
+            <label htmlFor={`kv-value-${row.id}`}>값</label>
+            <input
               id={`kv-value-${row.id}`}
-              labelText="값"
               type={SECRET_KEY_PATTERN.test(row.key) ? "password" : "text"}
               value={row.value}
               onChange={(e) => updateValue(row.id, e.target.value)}
-              style={{ flex: 2 }}
             />
-            <IconButton label="삭제" kind="ghost" onClick={() => remove(row.id)}>
-              <TrashCan />
-            </IconButton>
           </div>
-        ))}
-      </Stack>
-      <div style={{ display: "flex", gap: "0.5rem" }}>
-        <Button kind="tertiary" renderIcon={Add} onClick={add}>
-          항목 추가
-        </Button>
-        <Button onClick={save} disabled={saving}>
+          <button className="btn-icon" title="삭제" aria-label="삭제" onClick={() => remove(row.id)}>
+            ✕
+          </button>
+        </div>
+      ))}
+      <div style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}>
+        <button className="btn btn-ghost btn-sm" onClick={add}>
+          + 항목 추가
+        </button>
+        <button className="btn btn-primary btn-sm" onClick={save} disabled={saving}>
           {saving ? "저장 중..." : "저장"}
-        </Button>
+        </button>
       </div>
-    </Stack>
+    </div>
   );
 }

@@ -31,10 +31,11 @@ func New(baseURL, secret string) *Client {
 // Keep this in sync by hand with src/web/index.ts on the carol-bot side —
 // there is no shared type across the two repos.
 type BotStatus struct {
-	GuildCount       int    `json:"guildCount"`
-	GatewayPingMs    int    `json:"gatewayPingMs"`
-	LastSyncAt       string `json:"lastSyncAt"`
-	UptimeSeconds    int    `json:"uptimeSeconds"`
+	GuildCount    int    `json:"guildCount"`
+	GatewayPingMs int    `json:"gatewayPingMs"`
+	LastSyncAt    string `json:"lastSyncAt"`
+	UptimeSeconds int    `json:"uptimeSeconds"`
+	UserCount     int    `json:"userCount"`
 }
 
 func (c *Client) Fetch(ctx context.Context) (*BotStatus, error) {

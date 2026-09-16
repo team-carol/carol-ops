@@ -1,0 +1,175 @@
+/* Matches carol-bot's dark theme (docs/DESIGN.md in the carol repo) so
+   carol-ops feels like the same product family instead of a separate IBM
+   Carbon app bolted on the side. */
+:root {
+  --canvas: #0d0d0d;
+  --surface: #1a1a1a;
+  --border: #252525;
+  --border-soft: #2a2a2a;
+  --divider: #1e1e1e;
+  --accent: #9333ea;
+  --accent-light: #c084fc;
+  --text: #cccccc;
+  --text-hi: #ffffff;
+  --text-lo: #888888;
+  --text-dim: #666666;
+  --success: #4ade80;
+  --danger: #f87171;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body, #root { height: 100%; }
+
+body {
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  background: var(--canvas);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--accent-light); }
+code, pre { font-family: "JetBrains Mono", monospace; }
+
+.app-header {
+  display: flex;
+  align-items: center;
+  height: 56px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--divider);
+}
+.app-header .wordmark { font-size: 16px; font-weight: 800; color: var(--text-hi); }
+.app-header .wordmark .accent { color: var(--accent); }
+
+main { max-width: 960px; margin: 0 auto; padding: 32px 24px; }
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--divider);
+  margin-bottom: 24px;
+  overflow-x: auto;
+}
+.tab-btn {
+  background: none;
+  border: none;
+  color: var(--text-lo);
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+}
+.tab-btn.active { color: var(--text-hi); border-bottom-color: var(--accent); }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+}
+.stat-grid .stat-label { font-size: 11px; color: var(--text-lo); font-weight: 700; text-transform: uppercase; }
+.stat-grid .stat-value { font-size: 20px; color: var(--text-hi); font-weight: 800; margin-top: 4px; }
+
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.field label { font-size: 12px; color: var(--text-lo); font-weight: 600; }
+.field input {
+  background: #111;
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: var(--text-hi);
+  font-size: 14px;
+  font-family: inherit;
+  width: 100%;
+}
+.field input:focus { outline: none; border-color: var(--accent); }
+
+.row { display: flex; gap: 8px; align-items: flex-end; margin-bottom: 12px; }
+.row .field { flex: 1; margin-bottom: 0; min-width: 0; }
+
+.btn {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  font-family: inherit;
+}
+.btn:active { opacity: 0.8; }
+.btn:disabled { opacity: 0.5; cursor: default; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border-soft); }
+.btn-danger { background: transparent; color: var(--danger); border: 1px solid var(--border-soft); }
+.btn-sm { padding: 6px 12px; font-size: 13px; }
+.btn-icon {
+  background: transparent;
+  color: var(--text-lo);
+  border: none;
+  padding: 6px 10px;
+  font-size: 16px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.btn-icon:hover { color: var(--danger); }
+
+.notification {
+  border: 1px solid;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+.notification-error { background: rgba(248, 113, 113, 0.08); border-color: rgba(248, 113, 113, 0.3); color: var(--danger); }
+.notification-success { background: rgba(74, 222, 128, 0.08); border-color: rgba(74, 222, 128, 0.3); color: var(--success); }
+
+.tag { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+.tag-green { background: rgba(74, 222, 128, 0.15); color: var(--success); }
+.tag-gray { background: rgba(255, 255, 255, 0.08); color: var(--text-lo); }
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 24px;
+}
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 720px;
+  width: 100%;
+  max-height: 80vh;
+  overflow: auto;
+}
+.modal h3 { color: var(--text-hi); margin-bottom: 12px; }
+
+pre {
+  background: #111;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 12px;
+  max-height: 400px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: var(--text);
+}
+
+.spinner { color: var(--text-lo); font-size: 13px; }
+.progress-bar { height: 6px; border-radius: 999px; background: #111; overflow: hidden; margin-top: 6px; }
+.progress-bar-fill { height: 100%; background: var(--accent); }
