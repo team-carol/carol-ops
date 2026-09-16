@@ -32,6 +32,13 @@ services:
       - docker-proxy
     environment:
       CAROL_OPS_CONFIG: /app/config.json
+    # Runs as uid 10001 (see Dockerfile), which owns nothing on the host.
+    # Adding the host `deploy` user's gid here lets it read/write the
+    # bind-mounted config files as long as they're group-writable on the
+    # host (`chmod g+w config.json ../config.json ../.env`) — no need to
+    # chown anything to 10001, and no need for world-writable permissions.
+    group_add:
+      - "1001"
     volumes:
       - ./config.json:/app/config.json
       # carol-bot is checked out directly at $HOME on the VM (not a `carol/`
