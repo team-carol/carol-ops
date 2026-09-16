@@ -1,7 +1,6 @@
 package main
 
 import (
-	"embed"
 	"io/fs"
 	"log"
 	"net/http"
@@ -12,10 +11,8 @@ import (
 	"carol-ops/internal/config"
 	"carol-ops/internal/dockerctl"
 	"carol-ops/internal/status"
+	"carol-ops/web"
 )
-
-//go:embed all:../../web/dist
-var embeddedWeb embed.FS
 
 func main() {
 	configPath := os.Getenv("CAROL_OPS_CONFIG")
@@ -35,7 +32,7 @@ func main() {
 		log.Printf("==============================================================")
 	}
 
-	staticFS, err := fs.Sub(embeddedWeb, "web/dist")
+	staticFS, err := fs.Sub(web.Dist, "dist")
 	if err != nil {
 		log.Fatalf("mount embedded web build: %v", err)
 	}
