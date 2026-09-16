@@ -1,0 +1,6 @@
+/bin/
+*.exe
+config.json
+config.local.json
+web/dist/
+web/node_modules/

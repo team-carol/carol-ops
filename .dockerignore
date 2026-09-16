@@ -1,0 +1,6 @@
+.git
+bin/
+config.json
+config.local.json
+web/node_modules
+web/dist

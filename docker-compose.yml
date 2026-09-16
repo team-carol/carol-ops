@@ -1,0 +1,59 @@
+name: carol-ops
+
+services:
+  # Only this service mounts the real docker.sock. carol-ops itself talks
+  # HTTP to this proxy — see internal/dockerctl/client.go for why that split
+  # exists (docker-group membership == host root; this narrows the blast
+  # radius to a whitelisted API subset).
+  docker-proxy:
+    image: tecnativa/docker-socket-proxy:latest
+    container_name: carol-ops-docker-proxy
+    restart: unless-stopped
+    environment:
+      CONTAINERS: 1
+      POST: 1
+      EXEC: 0
+      IMAGES: 0
+      NETWORKS: 0
+      VOLUMES: 0
+      INFO: 0
+      BUILD: 0
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - internal
+
+  carol-ops:
+    build: .
+    image: ghcr.io/bitbyte08/carol-ops:latest
+    container_name: carol-ops
+    restart: unless-stopped
+    depends_on:
+      - docker-proxy
+    environment:
+      CAROL_OPS_CONFIG: /app/config.json
+    volumes:
+      - ./config.json:/app/config.json
+      # carol-bot is checked out directly at $HOME on the VM (not a `carol/`
+      # subdirectory), and carol-ops lives at $HOME/carol-ops — so one level
+      # up is carol-bot's checkout root. Adjust if either path ever changes.
+      - ../config.json:/carol/config.json
+      - ../.env:/carol/.env
+    networks:
+      # internal: reach docker-proxy. carol-shared: reach carol-bot's
+      # GET /admin/status (external network, joined by both compose
+      # projects — see carol's docker-compose.yml `bot.networks`). Create it
+      # once on the host: `docker network create carol-shared`.
+      - internal
+      - carol-shared
+    ports:
+      # Admin UI. Do not expose this publicly — put it behind an SSH tunnel,
+      # a Cloudflare Access-protected hostname, or a VPN. It's a single
+      # shared-credential login, not meant to be internet-facing.
+      - "127.0.0.1:8090:8090"
+
+networks:
+  internal:
+    internal: true
+  carol-shared:
+    external: true
