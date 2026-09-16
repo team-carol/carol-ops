@@ -84,7 +84,7 @@ export default function KeyValueEditor({ entries, onSave }: Props) {
               onChange={(e) => updateValue(row.id, e.target.value)}
               style={{ flex: 2 }}
             />
-            <IconButton label="삭제" kind="danger--tertiary" onClick={() => remove(row.id)}>
+            <IconButton label="삭제" kind="ghost" onClick={() => remove(row.id)}>
               <TrashCan />
             </IconButton>
           </div>
