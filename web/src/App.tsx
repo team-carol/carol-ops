@@ -13,9 +13,13 @@ export default function App() {
   return (
     <>
       <header className="app-header">
-        <span className="wordmark">
-          carol<span className="accent">ops</span>
-        </span>
+        <div className="app-header-inner">
+          <div className="brand">
+            <img src="/carolbot-avatar.png" alt="" />
+            <span className="wordmark">캐롤봇 운영</span>
+          </div>
+          <span className="header-label">team carol</span>
+        </div>
       </header>
       <main>
         <DashboardPage />

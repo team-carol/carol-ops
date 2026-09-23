@@ -14,9 +14,13 @@ export default function DashboardPage() {
   const [tab, setTab] = useState<Tab>("상태");
   return (
     <div>
+      <div className="page-heading">
+        <h1>운영 대시보드</h1>
+        <p>캐롤봇과 서버 상태를 확인하고 설정을 관리합니다.</p>
+      </div>
       <div className="tabs">
         {TABS.map((t) => (
-          <button key={t} className={`tab-btn ${tab === t ? "active" : ""}`} onClick={() => setTab(t)}>
+          <button key={t} className={`tab-btn ${tab === t ? "active" : ""}`} aria-pressed={tab === t} onClick={() => setTab(t)}>
             {t}
           </button>
         ))}
